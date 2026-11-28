@@ -1,0 +1,32 @@
+# Vigia de fora do notebook (painel do escritorio, 18/11/2026). Gerado pelo programa a cada envio: nao editar aqui.
+# Seg a sex, 13h17 e 18h17 de Maceio (16h17 e 21h17 UTC; 19/11/2026: duas rodadas, fora da hora cheia, porque o
+# GitHub atrasa as agendadas): se o notebook nao deu sinal desde as 7h, a rodada falha e o GitHub avisa. Rodada que
+# o GitHub atrasar para depois da meia-noite confere o dia anterior.
+name: Vigia do notebook
+on:
+  schedule:
+    - cron: '17 16 * * 1-5'
+    - cron: '17 21 * * 1-5'
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      teste:
+        description: 'Mandar um e-mail de TESTE do vigia (precisa das 3 chaves VIGIA_EMAIL_*)'
+        type: boolean
+        default: false
+permissions:
+  contents: read
+jobs:
+  vigia:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - name: Confere o sinal do notebook
+        env:
+          VIGIA_EMAIL_DE: ${{ secrets.VIGIA_EMAIL_DE }}
+          VIGIA_EMAIL_SENHA: ${{ secrets.VIGIA_EMAIL_SENHA }}
+          VIGIA_EMAIL_PARA: ${{ secrets.VIGIA_EMAIL_PARA }}
+          VIGIA_TESTE: ${{ inputs.teste }}
+        run: python3 .github/vigia_notebook.py
